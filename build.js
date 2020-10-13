@@ -5,7 +5,7 @@ setTimeout(()=>{
 fs.writeFileSync("post.html",`<html>
   <head></head>
   <body>
-    <h1>WORK!!!!</h1>
+    <h1>WORK!!!</h1>
     <h2>
       ${new Date()}
     </h2>

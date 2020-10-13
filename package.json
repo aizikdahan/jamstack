@@ -1,0 +1,6 @@
+{
+  "name":"TEST",
+  "script":{
+    "build":"node build.js"
+  }
+}

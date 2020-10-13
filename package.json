@@ -1,6 +1,6 @@
 {
   "name":"TEST",
-  "script":{
+  "scripts":{
     "build":"node build.js"
   }
 }

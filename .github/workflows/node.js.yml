@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x, 14.x]
+        node-version: [12.x]
 
     steps:
     - uses: actions/checkout@v2
@@ -25,3 +25,12 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm run build --if-present
+    - name: Cache
+      uses: actions/cache@v2.1.2
+      with:
+        # A list of files, directories, and wildcard patterns to cache and restore
+        path: post.html
+        # An explicit key for restoring and saving the cache
+        key: post
+       
+    

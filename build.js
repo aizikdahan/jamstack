@@ -1,5 +1,5 @@
 const fs = require("fs")
-
+console.log("start...");
 
 setTimeout(()=>{
 fs.writeFileSync("post.html",`<html>
@@ -14,4 +14,4 @@ fs.writeFileSync("post.html",`<html>
 </html>`)
 console.log("done");
 
-},1000 * 300)
+},1000 * 3)

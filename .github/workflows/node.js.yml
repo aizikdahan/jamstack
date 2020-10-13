@@ -25,6 +25,15 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm run build --if-present
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.1.4
+      with:
+        # Artifact name
+        name: post
+        # A file, directory or wildcard pattern that describes what to upload
+        path: post.html
+        # The desired behavior if no files are found using the provided path.
+
     - name: Cache
       uses: actions/cache@v2.1.2
       with:

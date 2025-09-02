@@ -30,7 +30,7 @@ jobs:
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ./dist   # change to your build folder (e.g. ./build, ./out, ./public, etc.)
+          path: ./   # change to your build folder (e.g. ./build, ./out, ./public, etc.)
 
   deploy:
     needs: build

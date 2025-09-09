@@ -14,7 +14,7 @@ self.addEventListener('install', (event) => {
       try {
         // Example: Replace with your real stock API
         const res = await fetch("https://market.tipranks.com/api/quotes/GetQuotes?app_name=tr&tickers=SOXX");
-        const data = await res.json();
+        const data = (await res.json()).quotes;
         const price = data[0].price; // BTC price in USD
   
         console.log("💰 Current Price:", price);

@@ -8,7 +8,7 @@ if ('serviceWorker' in navigator) {
           await reg.periodicSync.register("check-stocks", {
             minInterval: 15 * 60 * 1000 // 15 minutes
           });
-          console.log("✅ Periodic Sync registered");
+          alert("✅ Periodic Sync registered");
         } catch (err) {
           console.error("⚠️ Periodic sync registration failed", err);
         }

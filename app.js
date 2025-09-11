@@ -10,6 +10,7 @@ if ('serviceWorker' in navigator) {
           });
           alert("✅ Periodic Sync registered");
         } catch (err) {
+            alert(err.message);
           console.error("⚠️ Periodic sync registration failed", err);
         }
       }

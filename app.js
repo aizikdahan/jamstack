@@ -1,6 +1,6 @@
 // Register service worker
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/jamstack//sw.js?ver=3').then(async (reg) => {
+    navigator.serviceWorker.register('/jamstack//sw.js?ver=4').then(async (reg) => {
       console.log("✅ Service Worker registered");
   
       if ('periodicSync' in reg) {

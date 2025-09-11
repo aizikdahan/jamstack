@@ -19,9 +19,9 @@ self.addEventListener('install', (event) => {
   
         console.log("💰 Current Price:", price);
   
-      
+      const date = new Date().toLocaleTimeString()
           self.registration.showNotification("🚀 Stock Alert", {
-            body: `SOXX reached $${price}`,
+            body: `SOXX reached $${price} - ${date}`,
             icon: "/stock.png"
           });
         

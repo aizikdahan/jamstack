@@ -2,7 +2,7 @@
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/jamstack//sw.js?ver=4').then(async (reg) => {
       console.log("✅ Service Worker registered");
-  
+  alert('periodicSync' in reg)
       if ('periodicSync' in reg) {
         try {
           await reg.periodicSync.register("check-stocks", {

@@ -2,15 +2,17 @@
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/jamstack//sw.js?ver=4').then(async (reg) => {
       console.log("✅ Service Worker registered");
-  alert('periodicSync' in reg)
+   info.innerHTML += JSON.stringify({f:'periodicSync' in reg})
       if ('periodicSync' in reg) {
         try {
           await reg.periodicSync.register("check-stocks", {
             minInterval: 15 * 60 * 1000 // 15 minutes
           });
           alert("✅ Periodic Sync registered");
+             info.innerHTML += "<br/>✅ Periodic Sync registered"
         } catch (err) {
-            alert(err.message);
+          
+             info.innerHTML += "<br/>✅err.message"
           console.error("⚠️ Periodic sync registration failed", err);
         }
       }

@@ -67,9 +67,17 @@
         </div>
       `;
     }
-
+    const url = "https://"+localStorage.getItem("api");
+    let key = localStorage.getItem("key");
+    if(!key){
+         key = promt("Enter key");
+        localStorage.setItem("key",key)
+    }
     // usage
-    const data = /* your JSON object */;
+    const data = await (await fetch(url+"/summary",{
+      headers:{
+        "X-API-KEY":key
+    }))
     document.getElementById("app").innerHTML = renderOptionsHTML(data);
   </script>
 

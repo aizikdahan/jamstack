@@ -72,12 +72,15 @@
     if(!key){
          key = promt("Enter key");
         localStorage.setItem("key",key)
+    };
+
+    const headers = {
+ "X-API-KEY":key
     }
+    const urlapi =url+"/summary";
     // usage
-    const data = await (await fetch(url+"/summary",{
-      headers:{
-        "X-API-KEY":key
-    }})).json();
+    const raw = await fetch(urlapi,{headers});
+    const data = await raw.json();
     document.getElementById("app").innerHTML = renderOptionsHTML(data);
   </script>
 

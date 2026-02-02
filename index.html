@@ -70,7 +70,7 @@
     const url = "https://"+localStorage.getItem("api");
     let key = localStorage.getItem("key");
     if(!key){
-         key = promt("Enter key");
+         key = window.prompt("Enter key");
         localStorage.setItem("key",key)
     };
 

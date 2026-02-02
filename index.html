@@ -77,7 +77,7 @@
     const data = await (await fetch(url+"/summary",{
       headers:{
         "X-API-KEY":key
-    }))
+    }})).json();
     document.getElementById("app").innerHTML = renderOptionsHTML(data);
   </script>
 

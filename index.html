@@ -1,35 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>📈 Stock Alerts PWA</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#2c3e50"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-  <!-- Tailwind CSS CDN -->
+  <meta charset="UTF-8" />
+  <title>Options Summary</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
- <div id="info"></div>
-  <div class="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full text-center">
-    <h1 class="text-3xl font-bold text-gray-800 mb-4">📈 Stock Alerts</h1>
-    <p class="text-gray-600 mb-6">
-      Get notified when a stock price hits your target.<br/>
-      Works offline & in the background 🚀
-    </p>
+<body class="bg-slate-950 text-slate-100 p-6">
 
-    <div class="flex flex-col gap-4">
-      <button id="enable" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition">
-        🔔 Enable Notifications 2
-      </button>
+  <div id="app" class="max-w-7xl mx-auto"></div>
 
-      <button id="installBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition">
-        📲 Install App
-      </button>
-    </div>
-  </div>
+  <script>
+    function renderOptionsHTML(data) {
+      const { all, summary } = data;
 
-  <script src="app.js?v=2"></script>
+      const cards = `
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+          ${card("Total Invest", `$${all.invest}`)}
+          ${card("Open Trades", all.open)}
+          ${card("Closed Trades", all.closed)}
+          ${card("Total Gain", `$${all.gain}`)}
+          ${card("Gain %", `${all.gainPercent}%`)}
+        </div>
+      `;
+
+      const rows = summary.map(t => `
+        <tr class="border-b border-slate-800 hover:bg-slate-900">
+          <td class="px-4 py-3 font-medium">${t.underlying}</td>
+          <td class="px-4 py-3 text-xs text-slate-400">${t.optionSymbol}</td>
+          <td class="px-4 py-3">${t.buyDate}</td>
+          <td class="px-4 py-3">${t.entryPrice}</td>
+          <td class="px-4 py-3">$${t.invest}</td>
+          <td class="px-4 py-3 ${t.isOpen ? 'text-green-400' : 'text-red-400'}">
+            ${t.isOpen ? 'OPEN' : 'CLOSED'}
+          </td>
+        </tr>
+      `).join("");
+
+      const table = `
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-900 text-slate-400 uppercase text-xs">
+              <tr>
+                <th class="px-4 py-3 text-left">Underlying</th>
+                <th class="px-4 py-3 text-left">Option</th>
+                <th class="px-4 py-3 text-left">Buy Date</th>
+                <th class="px-4 py-3 text-left">Entry</th>
+                <th class="px-4 py-3 text-left">Invest</th>
+                <th class="px-4 py-3 text-left">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      return cards + table;
+    }
+
+    function card(label, value) {
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+          <div class="text-xs text-slate-400 mb-1">${label}</div>
+          <div class="text-xl font-semibold">${value}</div>
+        </div>
+      `;
+    }
+
+    // usage
+    const data = /* your JSON object */;
+    document.getElementById("app").innerHTML = renderOptionsHTML(data);
+  </script>
+
 </body>
 </html>

@@ -67,6 +67,10 @@
         </div>
       `;
     }
+    if(window.location.hash){
+      const api = window.location.hash.replace("#","");
+       localStorage.setItem("api",api)
+    }
     const url = "https://"+localStorage.getItem("api");
     let key = localStorage.getItem("key");
     if(!key){

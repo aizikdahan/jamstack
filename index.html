@@ -74,7 +74,8 @@
         localStorage.setItem("key",key)
     };
 
-    const headers = {
+    async function  init() {
+      const headers = {
  "X-API-KEY":key
     }
     const urlapi =url+"/summary";
@@ -82,6 +83,8 @@
     const raw = await fetch(urlapi,{headers});
     const data = await raw.json();
     document.getElementById("app").innerHTML = renderOptionsHTML(data);
+    }
+    init()
   </script>
 
 </body>

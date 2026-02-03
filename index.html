@@ -38,10 +38,10 @@
     function renderStats(all) {
       const container = document.getElementById('stats-container');
       container.innerHTML = `
-        ${card("Invested", `$${all.invest}`)}
-        ${card("Gain", `$${all.gain}`, all.gain >= 0 ? 'text-green-400' : 'text-red-400')}
+        ${card("Invested", `$${all.invest?.toFixed(2)}`)}
+        ${card("Gain", `$${all.gain?.toFixed(2)}`, all.gain >= 0 ? 'text-green-400' : 'text-red-400')}
         ${card("PnL", `$${all.curPnl?.toFixed(2)}`)}
-        ${card("Gain %", `${all.gainPercent?.toFixed(2)}%`)}
+        ${card("Gain %", `${(all.gainPercent * 100)?.toFixed(2)}%`)}
       `;
     }
 
@@ -138,7 +138,7 @@ function parseExpiration(optionSymbol) {
           </div>
           <div class="flex justify-between border-b border-slate-800 pb-2">
             <span class="text-slate-400 text-sm">Shares</span>
-            <span>${t.shares}</span>
+            <span>${t.shares * 100}</span>
           </div>
           <div class="flex justify-between border-b border-slate-800 pb-2">
             <span class="text-slate-400 text-sm">Target Price</span>

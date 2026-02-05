@@ -1,132 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Options Mobile</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .modal-active { overflow: hidden; }
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-  </style>
-</head>
-<body class="bg-slate-950 text-slate-100 p-4 font-sans">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Options Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .modal-active {
+        overflow: hidden;
+      }
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-100 p-4 font-sans">
+    <div id="app" class="max-w-md mx-auto">
+      <div id="stats-container" class="grid grid-cols-3 gap-3 mb-6"></div>
 
-  <div id="app" class="max-w-md mx-auto">
-    <div id="stats-container" class="grid grid-cols-2 gap-3 mb-6"></div>
+      <div class="flex border-b border-slate-800 mb-4">
+        <button
+          onclick="switchTab('open')"
+          id="tab-open"
+          class="flex-1 py-3 text-center border-b-2 border-blue-500 font-semibold"
+        >
+          Open
+        </button>
+        <button
+          onclick="switchTab('closed')"
+          id="tab-closed"
+          class="flex-1 py-3 text-center border-b-2 border-transparent text-slate-400"
+        >
+          Closed
+          <small></small>
+        </button>
+      </div>
 
-    <div class="flex border-b border-slate-800 mb-4">
-      <button onclick="switchTab('open')" id="tab-open" class="flex-1 py-3 text-center border-b-2 border-blue-500 font-semibold">Open</button>
-      <button onclick="switchTab('closed')" id="tab-closed" class="flex-1 py-3 text-center border-b-2 border-transparent text-slate-400">
-        Closed
-        <small></small>
-    </button>
+      <div id="list-open" class="space-y-3"></div>
+      <div id="list-closed" class="hidden space-y-3"></div>
     </div>
 
-    <div id="list-open" class="space-y-3"></div>
-    <div id="list-closed" class="hidden space-y-3"></div>
-  </div>
-
-  <div id="modal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-end sm:items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-t-2xl sm:rounded-2xl p-6 relative">
-      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-500">✕</button>
-      <div id="modal-content"></div>
+    <div
+      id="modal"
+      class="fixed inset-0 bg-black/80 hidden z-50 flex items-end sm:items-center justify-center p-4"
+    >
+      <div
+        class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-t-2xl sm:rounded-2xl p-6 relative"
+      >
+        <button
+          onclick="closeModal()"
+          class="absolute top-4 right-4 text-slate-500"
+        >
+          ✕
+        </button>
+        <div id="modal-content"></div>
+      </div>
     </div>
-  </div>
 
-  <script>
-    let globalData = null;
+    <script>
+      let globalData = null;
 
-    function renderStats(all) {
-      const container = document.getElementById('stats-container');
-      container.innerHTML = `
+      function renderStats(all) {
+        const container = document.getElementById("stats-container");
+        container.innerHTML = `
         ${card("Invested", `$${all.invest?.toFixed(2)}`)}
-        ${card("Gain", `$${all.gain?.toFixed(2)}`, all.gain >= 0 ? 'text-green-400' : 'text-red-400')}
+        ${card(
+          "Gain",
+          `$${all.gain?.toFixed(2)}`,
+          all.gain >= 0 ? "text-green-400" : "text-red-400"
+        )}
         ${card("PnL", `$${all.curPnl?.toFixed(2)}`)}
         ${card("Gain %", `${(all.gainPercent * 100)?.toFixed(2)}%`)}
+        ${card("Gain Stocks", `${(all.averageReturn.gain * 100)?.toFixed(2)}%`)}
+        ${card("Gain T Stocks", `${all.averageReturn.totalGain}`)}
+        ${card("Loss T Stocks", `${all.averageReturn.totalLoss}`)}
       `;
-    }
+      }
 
-    function card(label, value, colorClass = '') {
-      return `<div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
+      function card(label, value, colorClass = "") {
+        return `<div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
         <div class="text-[10px] text-slate-500 uppercase">${label}</div>
-        <div class="text-lg font-bold ${colorClass}">${value}</div>
+        <div class="text-[16px] font-bold ${colorClass}">${value}</div>
       </div>`;
-    }
-    function getStrike(symbol) {
-  // 1. Get the last 8 characters
-  const strikePart = symbol.slice(-8); 
-  
-  // 2. Convert to a number and divide by 1000 to handle decimals
-  const strikePrice = parseFloat(strikePart) / 1000;
-  
-  return strikePrice;
-}
-function parseExpiration(optionSymbol) {
-  // AAPL260220C155 → 2026-02-20
-  const m = optionSymbol.match(/^[A-Z]+(\d{2})(\d{2})(\d{2})/);
-  if (!m) throw new Error("Invalid option symbol");
+      }
+      function getStrike(symbol) {
+        // 1. Get the last 8 characters
+        const strikePart = symbol.slice(-8);
 
-  const [_, yy, mm, dd] = m;
-  return new Date(Date.UTC(2000 + +yy, +mm - 1, +dd));
-}
+        // 2. Convert to a number and divide by 1000 to handle decimals
+        const strikePrice = parseFloat(strikePart) / 1000;
 
+        return strikePrice;
+      }
+      function parseExpiration(optionSymbol) {
+        // AAPL260220C155 → 2026-02-20
+        const m = optionSymbol.match(/^[A-Z]+(\d{2})(\d{2})(\d{2})/);
+        if (!m) throw new Error("Invalid option symbol");
 
-    function createListItem(t, index) {
-      // Logic for P/C indicator
-      const isCall = /C[0-9]+$/.test(t.optionSymbol);
-      const strike = getStrike(t.optionSymbol);
-      const typeColor = isCall ? 'text-green-400' : 'text-orange-400';
-     
-      t.expiryDate = parseExpiration(t.optionSymbol).toISOString().split('T')[0];
-      const sellPrice = t.sell_price || t.optionPrice;
-      
-      const investCents = t.invest;
-      const gainCents = sellPrice - t.entryPrice;
-      console.log(gainCents, investCents);
-      const gainPercent =gainCents / investCents;
-      const pnlColor = Math.abs(gainPercent) < 0.001  ? 'text-gray-400' : gainPercent > 0 ? 'text-green-400' : 'text-red-400';
-      return `        <div onclick="showDetails(${index})" class="bg-slate-900 border border-slate-800 rounded-xl p-4 active:scale-[0.98] transition-transform">
+        const [_, yy, mm, dd] = m;
+        return new Date(Date.UTC(2000 + +yy, +mm - 1, +dd));
+      }
+
+      function createListItem(t, index) {
+        // Logic for P/C indicator
+        const isCall = /C[0-9]+$/.test(t.optionSymbol);
+        const strike = getStrike(t.optionSymbol);
+        const typeColor = isCall ? "text-green-400" : "text-orange-400";
+
+        t.expiryDate = parseExpiration(t.optionSymbol)
+          .toISOString()
+          .split("T")[0];
+        const sellPrice = t.sell_price || t.optionPrice;
+
+        const investCents = t.invest;
+        const gainCents = sellPrice - t.entryPrice;
+        console.log(gainCents, investCents);
+        const gainPercent = gainCents / investCents;
+        const pnlColor =
+          Math.abs(gainPercent) < 0.001
+            ? "text-gray-400"
+            : gainPercent > 0
+            ? "text-green-400"
+            : "text-red-400";
+        return `        <div onclick="showDetails(${index})" class="bg-slate-900 border border-slate-800 rounded-xl p-4 active:scale-[0.98] transition-transform">
           <div class="flex items-center gap-3">
-            <span class="font-bold text-lg ${typeColor}">${isCall ? 'C' : 'P'}</span>
+            <span class="font-bold text-lg ${typeColor}">${
+          isCall ? "C" : "P"
+        }</span>
             <div class="grid grid-cols-3 flex-1 gap-2">
               <div>
                 <div class="font-bold text-sm truncate">${t.underlying}</div>
-                <div class="text-[10px] text-slate-500">${t.expiryDate || 'YY-MM-DD'}</div>
+                <div class="text-[10px] text-slate-500">${
+                  t.expiryDate || "YY-MM-DD"
+                }</div>
               </div>
               <div class="text-center border-x border-slate-800">
-                <div class="font-bold text-sm">${strike || '---'}</div>
-                <div class="text-[10px] text-slate-500">${t.stockPrice?.toFixed(2) || 'Price'}</div>
+                <div class="font-bold text-sm">${strike || "---"}</div>
+                <div class="text-[10px] text-slate-500">${
+                  t.stockPrice?.toFixed(2) || "Price"
+                }</div>
               </div>
               <div class="text-right">
                 <div class="font-bold text-sm">$${t.optionPrice}</div>
-                <div class="text-[10px] ${pnlColor}">${gainPercent.toFixed(2)}%(${sellPrice.toFixed(2)}$)</div>
+                <div class="text-[10px] ${pnlColor}">${gainPercent.toFixed(
+          2
+        )}%(${sellPrice.toFixed(2)}$)</div>
               </div>
             </div>
           </div>
         </div>
       `;
-    }
+      }
 
-    function switchTab(type) {
-      const isOpen = type === 'open';
-      document.getElementById('list-open').classList.toggle('hidden', !isOpen);
-      document.getElementById('list-closed').classList.toggle('hidden', isOpen);
-      
-      document.getElementById('tab-open').className = isOpen ? "flex-1 py-3 text-center border-b-2 border-blue-500 font-semibold" : "flex-1 py-3 text-center border-b-2 border-transparent text-slate-400";
-      document.getElementById('tab-closed').className = !isOpen ? "flex-1 py-3 text-center border-b-2 border-blue-500 font-semibold" : "flex-1 py-3 text-center border-b-2 border-transparent text-slate-400";
-    }
+      function switchTab(type) {
+        const isOpen = type === "open";
+        document
+          .getElementById("list-open")
+          .classList.toggle("hidden", !isOpen);
+        document
+          .getElementById("list-closed")
+          .classList.toggle("hidden", isOpen);
 
-    function showDetails(index) {
-      const t = globalData.summary[index];
-      const pnl= t.pnl || t.curPnl;
-      const isCall = /C[0-9]+$/.test(t.optionSymbol);
-      const content = `
+        document.getElementById("tab-open").className = isOpen
+          ? "flex-1 py-3 text-center border-b-2 border-blue-500 font-semibold"
+          : "flex-1 py-3 text-center border-b-2 border-transparent text-slate-400";
+        document.getElementById("tab-closed").className = !isOpen
+          ? "flex-1 py-3 text-center border-b-2 border-blue-500 font-semibold"
+          : "flex-1 py-3 text-center border-b-2 border-transparent text-slate-400";
+      }
+      function averageReturn(positions) {
+        if (!positions.length) return 0;
+
+        const gains = positions.map((t) => {
+          const isCall = /C[0-9]+$/.test(t.optionSymbol);
+          const gain = isCall
+            ? t.stockPrice - t.underlying_entry_price
+            : t.underlying_entry_price - t.stockPrice;
+          return {
+            entry: isCall ? t.underlying_entry_price : t.stockPrice,
+            current: isCall ? t.stockPrice : t.underlying_entry_price,
+            gain,
+          };
+        });
+        const sum = gains.reduce(
+          (acc, p) => acc + (p.current - p.entry) / p.entry,
+          0
+        );
+
+        return {
+          gain: sum / positions.length,
+          totalGain: gains.filter((x) => x.gain > 0).length,
+          totalLoss: gains.filter((x) => x.gain < 0).length,
+        };
+      }
+
+      function showDetails(index) {
+        const t = globalData.summary[index];
+        const pnl = t.pnl || t.curPnl;
+        const isCall = /C[0-9]+$/.test(t.optionSymbol);
+        const content = `
         <h3 class="text-xl font-bold mb-4">${t.underlying}
             <small class="text-[14px] text-slate-500">${t.expiryDate}</small>
-            <small class="text-[14px] text-purple-500">${getStrike(t.optionSymbol)}</small>
-            <span class="font-mono ${isCall ? 'text-green-400' : 'text-orange-400'} text-sm">${isCall ? 'CALL' : 'PUT'}</span>
+            <small class="text-[14px] text-purple-500">${getStrike(
+              t.optionSymbol
+            )}</small>
+            <span class="font-mono ${
+              isCall ? "text-green-400" : "text-orange-400"
+            } text-sm">${isCall ? "CALL" : "PUT"}</span>
             </h3>
         <div class="space-y-4">
           <div class="flex justify-between border-b border-slate-800 pb-2">
@@ -147,7 +228,9 @@ function parseExpiration(optionSymbol) {
           </div>
           <div class="flex justify-between border-b border-slate-800 pb-2">
             <span class="text-slate-400 text-sm">Target Price</span>
-            <span>$${t.targetPrice?.toFixed(2)} / ${t.stockPrice?.toFixed(2)}</span>
+            <span>$${t.targetPrice?.toFixed(2)} / ${t.stockPrice?.toFixed(
+          2
+        )}</span>
           </div>
           <div class="flex justify-between border-b border-slate-800 pb-2">
             <span class="text-slate-400 text-sm">Underlying Sell Price</span>
@@ -166,83 +249,111 @@ function parseExpiration(optionSymbol) {
           </div>
            <div class="flex justify-between border-b border-slate-800 pb-2">
             <span class="text-slate-400 text-sm">PNL</span>
-                       <span class="${pnl >= 0 ? 'text-green-400' : 'text-red-400'}">$${pnl?.toFixed(2)}</span>
+                       <span class="${
+                         pnl >= 0 ? "text-green-400" : "text-red-400"
+                       }">$${pnl?.toFixed(2)}</span>
   
           </div>
           <div class="flex justify-between">
             <span class="text-slate-400 text-sm">Status</span>
-            <span class="${t.isOpen ? 'text-green-400' : 'text-red-400'}">${t.isOpen ? 'OPEN' : 'CLOSED'}</span>
+            <span class="${t.isOpen ? "text-green-400" : "text-red-400"}">${
+          t.isOpen ? "OPEN" : "CLOSED"
+        }</span>
           </div>
          
         </div>
       `;
-      document.getElementById('modal-content').innerHTML = content;
-      document.getElementById('modal').classList.remove('hidden');
-      document.body.classList.add('modal-active');
-    }
-
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
-      document.body.classList.remove('modal-active');
-    }
-
-    async function init() {
-      const api = localStorage.getItem("api");
-      let key = localStorage.getItem("key") || window.prompt("Enter key");
-      localStorage.setItem("key", key);
-
-      try {
-        const raw = await fetch(`https://${api}/summary`, { headers: { "X-API-KEY": key } });
-        globalData = await raw.json();
-        
-       
-        const open = globalData.summary.filter(t => t.isOpen);
-        const openList = open.reduce((a,b)=>{
-            return {
-                ...a,
-                [b.buyDate]: [...(a[b.buyDate] || []), b]
-            }
-        },{});
-        globalData.all.invest = open.map(x=>x.invest).reduce((a,b)=>a+b,0)
-        console.log(">>>>",open.map(x=>x.invest).reduce((a,b)=>a+b,0))
-        renderStats(globalData.all);
-        const closed = globalData.summary.filter(t => !t.isOpen);
-        const closedList =closed.reduce((a,b)=>{
-            return {
-                ...a,
-                [b.buyDate]: [...(a[b.buyDate] || []), b]
-            }
-        },{});
-
-        document.querySelector('#tab-closed small').textContent = `(${closed.length})`;
-            
-
-        document.getElementById('list-open').innerHTML = Object.entries(openList).map(([date, list]) => {
-            return `
-                <div class="mb-4">
-                    <h4 class="text-sm font-semibold mb-2">${date}</h4>
-                    <div class="space-y-3">
-                        ${list.map((t, i) => createListItem(t, globalData.summary.indexOf(t))).join('')}
-                    </div>
-                </div>
-            `
-        }).join('');    
-        document.getElementById('list-closed').innerHTML = Object.entries(closedList).map(([date, list]) => {
-            return `
-                <div class="mb-4">
-                    <h4 class="text-sm font-semibold mb-2">${date}</h4>
-                    <div class="space-y-3">
-                        ${list.map((t, i) => createListItem(t, globalData.summary.indexOf(t))).join('')}
-                    </div>
-                </div>
-            `
-        }).join('');
-      } catch (e) {
-        console.error("Fetch failed", e);
+        document.getElementById("modal-content").innerHTML = content;
+        document.getElementById("modal").classList.remove("hidden");
+        document.body.classList.add("modal-active");
       }
-    }
 
-    init();
-  </script>
-</body>
+      function closeModal() {
+        document.getElementById("modal").classList.add("hidden");
+        document.body.classList.remove("modal-active");
+      }
+
+      async function init() {
+        const api = localStorage.getItem("api");
+        let key = localStorage.getItem("key") || window.prompt("Enter key");
+        localStorage.setItem("key", key);
+
+        try {
+          const raw = await fetch(`https://${api}/summary`, {
+            headers: { "X-API-KEY": key },
+          });
+          globalData = await raw.json();
+
+          const open = globalData.summary.filter((t) => t.isOpen);
+          const openList = open.reduce((a, b) => {
+            return {
+              ...a,
+              [b.buyDate]: [...(a[b.buyDate] || []), b],
+            };
+          }, {});
+          globalData.all.invest = open
+            .map((x) => x.invest)
+            .reduce((a, b) => a + b, 0);
+          console.log(
+            ">>>>",
+            open.map((x) => x.invest).reduce((a, b) => a + b, 0)
+          );
+          globalData.all.averageReturn = averageReturn(globalData.summary);
+          renderStats(globalData.all);
+          const closed = globalData.summary.filter((t) => !t.isOpen);
+          const closedList = closed.reduce((a, b) => {
+            return {
+              ...a,
+              [b.buyDate]: [...(a[b.buyDate] || []), b],
+            };
+          }, {});
+
+          document.querySelector(
+            "#tab-closed small"
+          ).textContent = `(${closed.length})`;
+
+          document.getElementById("list-open").innerHTML = Object.entries(
+            openList
+          )
+            .map(([date, list]) => {
+              return `
+                <div class="mb-4">
+                    <h4 class="text-sm font-semibold mb-2">${date}</h4>
+                    <div class="space-y-3">
+                        ${list
+                          .map((t, i) =>
+                            createListItem(t, globalData.summary.indexOf(t))
+                          )
+                          .join("")}
+                    </div>
+                </div>
+            `;
+            })
+            .join("");
+          document.getElementById("list-closed").innerHTML = Object.entries(
+            closedList
+          )
+            .map(([date, list]) => {
+              return `
+                <div class="mb-4">
+                    <h4 class="text-sm font-semibold mb-2">${date}</h4>
+                    <div class="space-y-3">
+                        ${list
+                          .map((t, i) =>
+                            createListItem(t, globalData.summary.indexOf(t))
+                          )
+                          .join("")}
+                    </div>
+                </div>
+            `;
+            })
+            .join("");
+        } catch (e) {
+          console.error("Fetch failed", e);
+        }
+      }
+
+      init();
+    </script>
+  </body>
 </html>
